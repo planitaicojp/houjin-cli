@@ -133,6 +133,28 @@ func TestSearchAllPages(t *testing.T) {
 	}
 }
 
+func TestSearchByName_withTypeFilter(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		kind := r.URL.Query().Get("kind")
+		if kind != "03" {
+			t.Errorf("expected kind=03, got %s", kind)
+		}
+		data, _ := os.ReadFile("../../testdata/name_response.xml")
+		w.Header().Set("Content-Type", "application/xml")
+		w.Write(data)
+	}))
+	defer ts.Close()
+
+	client := api.NewClient("test-app-id", api.WithBaseURL(ts.URL))
+	_, err := client.SearchByName("トヨタ", api.SearchOptions{
+		Mode: "prefix",
+		Kind: "03",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
 func TestClient_apiError(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "forbidden", http.StatusForbidden)

@@ -66,6 +66,9 @@ func (c *Client) SearchByName(name string, opts SearchOptions) (*model.Response,
 	} else {
 		params.Set("close", "0")
 	}
+	if opts.Kind != "" {
+		params.Set("kind", opts.Kind)
+	}
 	params.Set("target", "1")
 
 	if opts.Divide > 0 {
