@@ -174,6 +174,29 @@ func TestGetDiff_withKindFilter(t *testing.T) {
 	}
 }
 
+func TestSearchByName_withAddress(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		addr := r.URL.Query().Get("address")
+		if addr != "13101" {
+			t.Errorf("expected address=13101, got %s", addr)
+		}
+		data, _ := os.ReadFile("../../testdata/name_response.xml")
+		w.Header().Set("Content-Type", "application/xml")
+		w.Write(data)
+	}))
+	defer ts.Close()
+
+	client := api.NewClient("test-app-id", api.WithBaseURL(ts.URL))
+	_, err := client.SearchByName("株式会社", api.SearchOptions{
+		Mode: "prefix",
+		Pref: "13",
+		City: "101",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
 func TestClient_apiError(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "forbidden", http.StatusForbidden)
