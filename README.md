@@ -35,15 +35,24 @@ scoop install houjin
 go install github.com/planitaicojp/houjin-cli@latest
 ```
 
-## セットアップ
+## アプリケーション ID の取得
 
-[法人番号システム Web-API](https://www.houjin-bangou.nta.go.jp/webapi/) でアプリケーション ID を取得し、以下のいずれかで設定：
+1. [法人番号システム Web-API](https://www.houjin-bangou.nta.go.jp/webapi/) にアクセス
+2. 「アプリケーションIDの発行届出」から申請（無料）
+3. メールアドレスを入力し、届出を送信
+4. 届いたメールに記載されたアプリケーション ID を確認
+
+発行されたアプリケーション ID は以下のいずれかの方法で設定できます：
+
+### 環境変数（推奨）
 
 ```bash
-# 環境変数
 export HOUJIN_APP_ID=your-application-id
+```
 
-# または設定ファイル
+### 設定ファイル
+
+```bash
 mkdir -p ~/.config/houjin
 cat > ~/.config/houjin/config.yaml << EOF
 app_id: your-application-id
@@ -51,7 +60,7 @@ format: json
 EOF
 ```
 
-優先順位: コマンドフラグ > 環境変数 > 設定ファイル
+優先順位: コマンドフラグ > 環境変数 (`HOUJIN_APP_ID`) > 設定ファイル (`~/.config/houjin/config.yaml`)
 
 ## 使い方
 
@@ -69,6 +78,13 @@ houjin get 1180301018771 --history
 
 # テーブル形式で出力
 houjin get 1180301018771 --format table
+
+# ファイルから一括取得
+houjin get --file numbers.txt
+
+# 標準入力から取得
+cat numbers.txt | houjin get --file -
+echo "1180301018771" | houjin get --file -
 ```
 
 ### 法人名で検索
@@ -82,6 +98,18 @@ houjin search トヨタ --mode partial
 
 # 都道府県を指定して検索
 houjin search トヨタ --pref 23
+
+# 法人種別でフィルタ（03=設立登記法人）
+houjin search トヨタ --type 03
+
+# 都道府県 + 市区町村コード指定
+houjin search 株式会社 --pref 13 --city 101
+
+# 全ページ自動取得
+houjin search トヨタ --all
+
+# 特定ページを指定
+houjin search トヨタ --page 2
 ```
 
 ### 更新情報の取得
@@ -89,6 +117,12 @@ houjin search トヨタ --pref 23
 ```bash
 # 期間内に更新された法人一覧
 houjin diff --from 2024-01-01 --to 2024-01-31
+
+# 変更事由でフィルタ（01=新規）
+houjin diff --from 2024-01-01 --to 2024-01-31 --kind 01
+
+# 全ページ自動取得
+houjin diff --from 2024-01-01 --to 2024-01-31 --all
 ```
 
 ## コマンド一覧
@@ -96,6 +130,7 @@ houjin diff --from 2024-01-01 --to 2024-01-31
 | コマンド | 説明 |
 |---------|------|
 | `houjin get <番号...>` | 法人番号を指定して法人情報を取得 |
+| `houjin get --file <ファイル>` | ファイルから法人番号を一括取得 |
 | `houjin search <法人名>` | 法人名で検索 |
 | `houjin diff` | 指定期間内の更新法人一覧を取得 |
 | `houjin version` | バージョン情報を表示 |
