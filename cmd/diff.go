@@ -6,12 +6,15 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/planitaicojp/houjin-cli/internal/api"
+	"github.com/planitaicojp/houjin-cli/internal/model"
 	"github.com/planitaicojp/houjin-cli/internal/output"
 )
 
 var (
 	diffFrom string
 	diffTo   string
+	diffPage int
+	diffAll  bool
 )
 
 func init() {
@@ -19,6 +22,8 @@ func init() {
 	diffCmd.Flags().StringVar(&diffTo, "to", "", "終了日 (YYYY-MM-DD) (必須)")
 	diffCmd.MarkFlagRequired("from")
 	diffCmd.MarkFlagRequired("to")
+	diffCmd.Flags().IntVar(&diffPage, "page", 0, "ページ番号を指定 (分割番号)")
+	diffCmd.Flags().BoolVar(&diffAll, "all", false, "全ページを自動取得")
 	rootCmd.AddCommand(diffCmd)
 }
 
@@ -33,7 +38,14 @@ var diffCmd = &cobra.Command{
 		}
 
 		client := api.NewClient(appID, api.WithVerbose(flagVerbose))
-		resp, err := client.GetDiff(diffFrom, diffTo)
+		opts := api.DiffOptions{Divide: diffPage}
+
+		var resp *model.Response
+		if diffAll {
+			resp, err = client.DiffAllPages(diffFrom, diffTo, opts)
+		} else {
+			resp, err = client.GetDiff(diffFrom, diffTo, opts)
+		}
 		if err != nil {
 			return err
 		}

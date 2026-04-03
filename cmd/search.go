@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/planitaicojp/houjin-cli/internal/api"
+	"github.com/planitaicojp/houjin-cli/internal/model"
 	"github.com/planitaicojp/houjin-cli/internal/output"
 )
 
@@ -14,6 +15,8 @@ var (
 	searchPref  string
 	searchCity  string
 	searchClose bool
+	searchPage  int
+	searchAll   bool
 )
 
 func init() {
@@ -21,6 +24,8 @@ func init() {
 	searchCmd.Flags().StringVar(&searchPref, "pref", "", "都道府県コード (01-47, 99=海外)")
 	searchCmd.Flags().StringVar(&searchCity, "city", "", "市区町村コード")
 	searchCmd.Flags().BoolVar(&searchClose, "close", false, "閉鎖法人を含める")
+	searchCmd.Flags().IntVar(&searchPage, "page", 0, "ページ番号を指定 (分割番号)")
+	searchCmd.Flags().BoolVar(&searchAll, "all", false, "全ページを自動取得")
 	rootCmd.AddCommand(searchCmd)
 }
 
@@ -36,12 +41,20 @@ var searchCmd = &cobra.Command{
 		}
 
 		client := api.NewClient(appID, api.WithVerbose(flagVerbose))
-		resp, err := client.SearchByName(args[0], api.SearchOptions{
-			Mode:  searchMode,
-			Pref:  searchPref,
-			City:  searchCity,
-			Close: searchClose,
-		})
+		opts := api.SearchOptions{
+			Mode:   searchMode,
+			Pref:   searchPref,
+			City:   searchCity,
+			Close:  searchClose,
+			Divide: searchPage,
+		}
+
+		var resp *model.Response
+		if searchAll {
+			resp, err = client.SearchAllPages(args[0], opts)
+		} else {
+			resp, err = client.SearchByName(args[0], opts)
+		}
 		if err != nil {
 			return err
 		}
