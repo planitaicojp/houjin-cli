@@ -197,6 +197,48 @@ func TestSearchByName_withAddress(t *testing.T) {
 	}
 }
 
+func setupDiffPagingServer(t *testing.T) *httptest.Server {
+	t.Helper()
+	page1, err := os.ReadFile("../../testdata/diff_response_page1.xml")
+	if err != nil {
+		t.Fatalf("failed to read page1: %v", err)
+	}
+	page2, err := os.ReadFile("../../testdata/diff_response_page2.xml")
+	if err != nil {
+		t.Fatalf("failed to read page2: %v", err)
+	}
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Query().Get("id") == "" {
+			http.Error(w, "missing id", http.StatusUnauthorized)
+			return
+		}
+		w.Header().Set("Content-Type", "application/xml")
+		divide := r.URL.Query().Get("divide")
+		if divide == "2" {
+			w.Write(page2)
+		} else {
+			w.Write(page1)
+		}
+	}))
+}
+
+func TestDiffAllPages(t *testing.T) {
+	ts := setupDiffPagingServer(t)
+	defer ts.Close()
+
+	client := api.NewClient("test-app-id", api.WithBaseURL(ts.URL))
+	resp, err := client.DiffAllPages("2024-01-01", "2024-01-15", api.DiffOptions{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(resp.Corporations) != 2 {
+		t.Errorf("expected 2 corporations, got %d", len(resp.Corporations))
+	}
+	if resp.DivideSize != 1 {
+		t.Errorf("expected merged divide_size 1, got %d", resp.DivideSize)
+	}
+}
+
 func TestClient_apiError(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "forbidden", http.StatusForbidden)

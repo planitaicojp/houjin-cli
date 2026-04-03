@@ -28,6 +28,7 @@ func init() {
 	searchCmd.Flags().IntVar(&searchPage, "page", 0, "ページ番号を指定 (分割番号)")
 	searchCmd.Flags().BoolVar(&searchAll, "all", false, "全ページを自動取得")
 	searchCmd.Flags().StringVar(&searchType, "type", "", "法人種別フィルタ (01:国の機関, 02:地方公共団体, 03:設立登記法人, 04:その他)")
+	searchCmd.MarkFlagsMutuallyExclusive("page", "all")
 	rootCmd.AddCommand(searchCmd)
 }
 

@@ -26,6 +26,7 @@ func init() {
 	diffCmd.Flags().IntVar(&diffPage, "page", 0, "ページ番号を指定 (分割番号)")
 	diffCmd.Flags().BoolVar(&diffAll, "all", false, "全ページを自動取得")
 	diffCmd.Flags().StringVar(&diffKind, "kind", "", "変更事由フィルタ (01:新規, 02:商号変更, 03:国内所在地変更, 04:国外所在地変更, 11:閉鎖, 12:復活, 13:吸収合併, 14:合併無効, 15:抹消, 99:削除)")
+	diffCmd.MarkFlagsMutuallyExclusive("page", "all")
 	rootCmd.AddCommand(diffCmd)
 }
 

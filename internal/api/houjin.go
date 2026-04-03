@@ -20,13 +20,13 @@ type SearchOptions struct {
 	Pref   string // prefecture code
 	City   string // city code
 	Close  bool
-	Kind   string // corporation type filter (will be used by Task 2)
+	Kind   string // corporation type filter (01-04, maps to API "kind" param)
 	Divide int    // page number (0 = default/first page)
 }
 
 // DiffOptions configures the GetDiff request.
 type DiffOptions struct {
-	Kind   string // change reason filter (01-99), used by Task 3
+	Kind   string // change reason filter (01-99, maps to API "kind" param)
 	Divide int    // page number (0 = default/first page)
 }
 
@@ -113,6 +113,8 @@ func (c *Client) SearchAllPages(name string, opts SearchOptions) (*model.Respons
 		all = append(all, resp.Corporations...)
 	}
 	first.Corporations = all
+	first.DivideNumber = 1
+	first.DivideSize = 1
 	return first, nil
 }
 
@@ -137,5 +139,7 @@ func (c *Client) DiffAllPages(from, to string, opts DiffOptions) (*model.Respons
 		all = append(all, resp.Corporations...)
 	}
 	first.Corporations = all
+	first.DivideNumber = 1
+	first.DivideSize = 1
 	return first, nil
 }
