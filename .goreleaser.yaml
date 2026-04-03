@@ -23,6 +23,7 @@ brews:
   - repository:
       owner: planitaicojp
       name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     homepage: https://github.com/planitaicojp/houjin-cli
     description: "法人番号システム Web-API CLI tool"
     license: MIT
@@ -32,7 +33,8 @@ brews:
 scoops:
   - repository:
       owner: planitaicojp
-      name: scoop-bucket
+      name: bucket
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
     homepage: https://github.com/planitaicojp/houjin-cli
     description: "法人番号システム Web-API CLI tool"
     license: MIT
