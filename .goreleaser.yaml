@@ -1,0 +1,49 @@
+version: 2
+
+builds:
+  - binary: houjin
+    ldflags:
+      - -s -w -X github.com/planitaicojp/houjin-cli/cmd.version={{.Version}}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        format: zip
+
+brews:
+  - repository:
+      owner: planitaicojp
+      name: homebrew-tap
+    homepage: https://github.com/planitaicojp/houjin-cli
+    description: "法人番号システム Web-API CLI tool"
+    license: MIT
+    install: |
+      bin.install "houjin"
+
+scoops:
+  - repository:
+      owner: planitaicojp
+      name: scoop-bucket
+    homepage: https://github.com/planitaicojp/houjin-cli
+    description: "法人番号システム Web-API CLI tool"
+    license: MIT
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
