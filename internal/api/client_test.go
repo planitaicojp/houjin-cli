@@ -155,6 +155,25 @@ func TestSearchByName_withTypeFilter(t *testing.T) {
 	}
 }
 
+func TestGetDiff_withKindFilter(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		kind := r.URL.Query().Get("kind")
+		if kind != "01" {
+			t.Errorf("expected kind=01, got %s", kind)
+		}
+		data, _ := os.ReadFile("../../testdata/diff_response.xml")
+		w.Header().Set("Content-Type", "application/xml")
+		w.Write(data)
+	}))
+	defer ts.Close()
+
+	client := api.NewClient("test-app-id", api.WithBaseURL(ts.URL))
+	_, err := client.GetDiff("2024-01-01", "2024-01-15", api.DiffOptions{Kind: "01"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
 func TestClient_apiError(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "forbidden", http.StatusForbidden)

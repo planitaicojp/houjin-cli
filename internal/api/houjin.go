@@ -83,6 +83,9 @@ func (c *Client) GetDiff(from, to string, opts DiffOptions) (*model.Response, er
 	params := url.Values{}
 	params.Set("from", from)
 	params.Set("to", to)
+	if opts.Kind != "" {
+		params.Set("kind", opts.Kind)
+	}
 	if opts.Divide > 0 {
 		params.Set("divide", strconv.Itoa(opts.Divide))
 	}
